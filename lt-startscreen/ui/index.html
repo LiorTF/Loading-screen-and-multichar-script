@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lior Tools — Character</title>
+    <link rel="icon" href="assets/icon.png" />
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="hidden">
+    <div id="bg" class="bg kenburns"></div>
+    <div class="fx" id="fx"></div>
+    <div class="ui-vignette"></div>
+    <div class="ui-grain"></div>
+
+    <!-- ============================= MULTICHAR ============================= -->
+    <section id="screen-multichar" class="screen">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <img class="brand-logo" src="assets/logo.png" alt="" />
+                <div class="brand-text">
+                    <span class="brand-name" data-brand-name>LIOR TOOLS</span>
+                    <span class="brand-sub">MULTI CHARACTER</span>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <button class="nav-item active" data-nav="characters">
+                    <svg viewBox="0 0 20 20" class="nav-ico"><circle cx="10" cy="7" r="3.2"/><path d="M4 17a6 6 0 0 1 12 0"/></svg>
+                    <span>Characters</span>
+                </button>
+                <button class="nav-item" data-nav="create">
+                    <svg viewBox="0 0 20 20" class="nav-ico"><path d="M10 4v12M4 10h12"/></svg>
+                    <span>Create Character</span>
+                </button>
+                <button class="nav-item" data-nav="settings">
+                    <svg viewBox="0 0 20 20" class="nav-ico"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2.2M10 15.3v2.2M2.5 10h2.2M15.3 10h2.2M4.6 4.6l1.6 1.6M13.8 13.8l1.6 1.6M15.4 4.6l-1.6 1.6M6.2 13.8l-1.6 1.6"/></svg>
+                    <span>Settings</span>
+                </button>
+                <!-- Disconnect intentionally omitted (toggle in config) -->
+                <button class="nav-item nav-danger hidden" data-nav="disconnect">
+                    <svg viewBox="0 0 20 20" class="nav-ico"><path d="M10 3v7"/><path d="M6 5.5a6 6 0 1 0 8 0"/></svg>
+                    <span>Disconnect</span>
+                </button>
+            </nav>
+
+            <div class="sig">
+                <span class="sig-name" data-sig-name>Lior Tools</span>
+                <span class="sig-sub" data-sig-sub>ROLEPLAY</span>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="mc-main">
+            <div class="welcome-chip">
+                <svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.2"/><path d="M4 17a6 6 0 0 1 12 0"/></svg>
+                <div><span class="wc-top">Welcome back,</span><span class="wc-name" id="playerName">Player</span></div>
+                <svg class="wc-caret" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
+            </div>
+
+            <header class="mc-head">
+                <h1 class="mc-title">CHOOSE YOUR CHARACTER</h1>
+                <p class="mc-sub">Select a character to join the server. You can create a new one or manage your existing characters.</p>
+            </header>
+
+            <div class="cards" id="charCards"></div>
+
+            <div class="help-bar">
+                <div class="help-left">
+                    <div class="help-ico">i</div>
+                    <div class="help-text">
+                        <div class="help-title">Need help?</div>
+                        <div class="help-body">If you're new here, just select a character and press Play. If you need to create a new one, use the Create Character option in the menu.</div>
+                    </div>
+                </div>
+                <button class="btn-ghost" data-open-guide>
+                    <svg viewBox="0 0 20 20"><path d="M4 4h9a2 2 0 0 1 2 2v10H6a2 2 0 0 0-2 2z"/><path d="M4 4v14"/></svg>
+                    Quick Guide
+                    <svg class="chev" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
+                </button>
+            </div>
+        </main>
+    </section>
+
+    <!-- ============================= SPAWN ============================= -->
+    <section id="screen-spawn" class="screen hidden">
+        <header class="sp-top">
+            <div class="sp-brand">
+                <img class="brand-logo" src="assets/logo.png" alt="" />
+                <div class="brand-text">
+                    <span class="brand-name" data-brand-name>LIOR TOOLS</span>
+                    <span class="brand-sub" data-sig-sub>ROLEPLAY</span>
+                </div>
+                <div class="sp-welcome">
+                    <span>WELCOME TO <b data-brand-name>LIOR TOOLS</b></span>
+                    <span class="dim">CHOOSE YOUR SPAWN LOCATION</span>
+                </div>
+            </div>
+            <div class="welcome-chip small">
+                <svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.2"/><path d="M4 17a6 6 0 0 1 12 0"/></svg>
+                <div><span class="wc-name" id="playerNameSpawn">Player</span><span class="wc-top" id="spawnCharName">New Character</span></div>
+            </div>
+        </header>
+
+        <div class="sp-body">
+            <div class="sp-left">
+                <header class="sp-head">
+                    <h1 class="sp-title"><svg class="pin" viewBox="0 0 20 20"><path d="M10 2a6 6 0 0 1 6 6c0 4.2-6 10-6 10S4 12.2 4 8a6 6 0 0 1 6-6z"/><circle cx="10" cy="8" r="2.2"/></svg> CHOOSE SPAWN LOCATION</h1>
+                    <p class="sp-sub">Select where you want to spawn in the city. You can change this later in the settings or use /spawnme in game.</p>
+                </header>
+                <div class="sp-grid" id="spawnCards"></div>
+            </div>
+
+            <aside class="sp-info" id="spawnInfo">
+                <div class="map">
+                    <img class="map-img" src="assets/map.jpg" alt="City map" />
+                    <div class="map-pin" id="mapPin"></div>
+                </div>
+                <div class="info-block">
+                    <div class="info-row head">
+                        <svg viewBox="0 0 20 20"><path d="M4 16V7l6-4 6 4v9z"/></svg>
+                        <div><span class="dim">LOCATION INFO</span><b id="infoName">Downtown</b></div>
+                    </div>
+                    <div class="info-line"><svg viewBox="0 0 20 20"><path d="M10 2l6 2v5c0 4-2.7 7-6 9-3.3-2-6-5-6-9V4z"/></svg><span>Safe Zone</span><b id="infoSafe">Yes</b></div>
+                    <div class="info-line"><svg viewBox="0 0 20 20"><path d="M3 12l1.5-4h11L17 12v3h-2M3 15v-3M6 15a1.5 1.5 0 1 0 3 0M13 15a1.5 1.5 0 1 0 3 0"/></svg><span>Vehicle Spawn</span><b id="infoVehicle">Nearby</b></div>
+                    <div class="info-line"><svg viewBox="0 0 20 20"><rect x="4" y="6" width="12" height="9" rx="1"/><path d="M8 6V4h4v2"/></svg><span>Access to Jobs</span><b id="infoJobs">Yes</b></div>
+                    <div class="info-line"><svg viewBox="0 0 20 20"><path d="M4 16V9M9 16V4M14 16v-5"/></svg><span>Popular</span><b id="infoPopular">High</b></div>
+                    <p class="info-blurb" id="infoBlurb">A great place to start your journey.</p>
+                </div>
+            </aside>
+        </div>
+
+        <footer class="sp-foot">
+            <div class="help-left">
+                <div class="help-ico">i</div>
+                <div class="help-text">
+                    <div class="help-title">Need help?</div>
+                    <div class="help-body">If you're new here, you can always ask other players or use /help in game.</div>
+                </div>
+            </div>
+            <button class="btn-primary lg" id="spawnConfirm" disabled>
+                <svg viewBox="0 0 20 20"><path d="M4 10h11M11 5l5 5-5 5"/></svg>
+                SPAWN HERE
+            </button>
+        </footer>
+    </section>
+
+    <!-- ============================= MODALS ============================= -->
+    <div class="modal-scrim hidden" id="modalScrim"></div>
+
+    <!-- Create -->
+    <div class="modal hidden" id="modalCreate">
+        <div class="modal-head">
+            <h2>Create Character</h2>
+            <button class="modal-x" data-close-modal><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+        </div>
+        <p class="modal-sub">Give your new character an identity. You can style their look next.</p>
+        <form id="createForm" class="form">
+            <div class="field-row">
+                <label class="field">
+                    <span>First Name</span>
+                    <input name="firstname" type="text" maxlength="20" autocomplete="off" placeholder="John" required />
+                </label>
+                <label class="field">
+                    <span>Last Name</span>
+                    <input name="lastname" type="text" maxlength="20" autocomplete="off" placeholder="Walker" required />
+                </label>
+            </div>
+            <div class="field-row">
+                <label class="field">
+                    <span>Date of Birth</span>
+                    <input name="dob" type="date" required />
+                </label>
+                <label class="field">
+                    <span>Nationality</span>
+                    <select name="nationality" id="natSelect"></select>
+                </label>
+            </div>
+            <div class="field">
+                <span>Gender</span>
+                <div class="seg" id="genderSeg">
+                    <button type="button" class="seg-btn active" data-gender="0">Male</button>
+                    <button type="button" class="seg-btn" data-gender="1">Female</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-ghost" data-close-modal>Cancel</button>
+                <button type="submit" class="btn-primary">
+                    <svg viewBox="0 0 20 20"><path d="M4 10l4 4 8-9"/></svg>
+                    Create &amp; Continue
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Delete -->
+    <div class="modal small hidden" id="modalDelete">
+        <div class="modal-head">
+            <h2>Delete Character?</h2>
+            <button class="modal-x" data-close-modal><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+        </div>
+        <p class="modal-sub">This permanently deletes <b id="delName">this character</b> and everything they own. This cannot be undone.</p>
+        <div class="confirm-hold">
+            <button class="btn-danger" id="deleteConfirm">
+                <span class="hold-fill"></span>
+                <span class="hold-label">Hold to Delete</span>
+            </button>
+        </div>
+        <div class="modal-actions center">
+            <button type="button" class="btn-ghost" data-close-modal>Keep Character</button>
+        </div>
+    </div>
+
+    <!-- Quick guide -->
+    <div class="modal hidden" id="modalGuide">
+        <div class="modal-head">
+            <h2>Quick Guide</h2>
+            <button class="modal-x" data-close-modal><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+        </div>
+        <ul class="guide-list">
+            <li><b>Select</b> a character card and press <b>Play</b> to jump in.</li>
+            <li><b>Create</b> a new character from the sidebar (up to <span id="guideMax">3</span> total).</li>
+            <li><b>Delete</b> a character from the card menu — hold to confirm.</li>
+            <li>After choosing a character you'll <b>pick a spawn location</b>.</li>
+            <li>Use <b>/help</b> in game any time you're stuck.</li>
+        </ul>
+        <div class="modal-actions center">
+            <button type="button" class="btn-primary" data-close-modal>Got it</button>
+        </div>
+    </div>
+
+    <div class="toast-wrap" id="toasts"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

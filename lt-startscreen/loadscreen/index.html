@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lior Tools — Loading</title>
+    <link rel="icon" href="assets/icon.png" />
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <!-- Cinematic photographic background (Ken-Burns motion) -->
+    <div id="bgImage" class="kenburns"></div>
+    <video id="bgVideo" muted loop playsinline></video>
+
+    <div class="fx" id="fx"></div>
+    <div class="grain"></div>
+    <div class="vignette"></div>
+    <div class="scanline"></div>
+
+    <div class="stage">
+        <!-- Top bar -->
+        <header class="topbar">
+            <div class="top-left">
+                <div class="mini-mark" id="topMark"></div>
+                <div class="top-brand">
+                    <span class="top-brand-name" id="topName">LIOR TOOLS</span>
+                    <span class="top-brand-strap" id="strapline"></span>
+                </div>
+            </div>
+            <div class="top-right">
+                <div class="footer-lines">
+                    <span id="footerLeft">CONNECTING YOU TO</span>
+                    <span id="footerRight">A BETTER ROLEPLAY EXPERIENCE</span>
+                </div>
+                <div class="mini-mark small" id="topMark2"></div>
+            </div>
+        </header>
+
+        <!-- Center block -->
+        <main class="center">
+            <div class="logo-wrap">
+                <div class="logo-glow"></div>
+                <img id="logo" class="logo" src="assets/logo.png" alt="Lior Tools" />
+            </div>
+
+            <h1 class="wordmark" id="wordmark">LIOR TOOLS</h1>
+            <div class="wordmark-sub" id="tagline">PREMIUM ROLEPLAY EXPERIENCE</div>
+
+            <div class="progress-block">
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill">
+                        <div class="progress-shine"></div>
+                    </div>
+                    <div class="progress-head" id="progressHead"></div>
+                </div>
+                <div class="progress-meta">
+                    <div class="loading-label">
+                        <span class="loading-main">LOADING</span>
+                        <span class="dots"><i>.</i><i>.</i><i>.</i></span>
+                        <span class="loading-sub">PLEASE WAIT</span>
+                    </div>
+                    <div class="percent" id="percent">0%</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Steps checklist -->
+        <aside class="steps" id="steps"></aside>
+
+        <!-- Bottom bar -->
+        <footer class="bottombar">
+            <div class="tip" id="tip">
+                <div class="tip-icon">i</div>
+                <div class="tip-text">
+                    <div class="tip-title" id="tipTitle">QUICK TIP</div>
+                    <div class="tip-body" id="tipBody"></div>
+                </div>
+            </div>
+            <div class="flavor" id="flavor"></div>
+        </footer>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/loading.js"></script>
+</body>
+</html>

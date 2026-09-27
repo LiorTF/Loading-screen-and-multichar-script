@@ -1,0 +1,5 @@
+# Preview / build artifacts
+shots/
+node_modules/
+*.log
+.DS_Store

@@ -343,9 +343,11 @@
     document.addEventListener('click', (e) => { if (!$('#ctx').contains(e.target)) hideCtx(); });
     document.addEventListener('contextmenu', (e) => { if (!e.target.closest('.slot')) e.preventDefault(); });
 
-    // Drop onto the scrim = drop item on the ground
-    $('.scrim').addEventListener('dragover', e => e.preventDefault());
-    $('.scrim').addEventListener('drop', e => {
+    // Drop onto empty space (outside any panel) = drop item on the ground
+    const invEl = $('#inv');
+    invEl.addEventListener('dragover', e => { if (!e.target.closest('.panel')) e.preventDefault(); });
+    invEl.addEventListener('drop', e => {
+        if (e.target.closest('.panel')) return;      // handled by slot drop
         e.preventDefault();
         if (!S.drag || S.drag.inv !== 'player') { S.drag = null; return; }
         const full = S.drag.item.amount, slot = S.drag.slot;

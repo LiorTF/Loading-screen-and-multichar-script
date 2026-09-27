@@ -18,13 +18,13 @@ html,body { width:100%; height:100%; overflow:hidden; background:transparent;
 svg { stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
 ::-webkit-scrollbar { width:8px; } ::-webkit-scrollbar-thumb { background:rgba(255,255,255,.12); border-radius:8px; }
 
-/* Overlay */
+/* Overlay — the world-dim lives on the root container itself (guaranteed
+   full-screen; no backdrop-filter, which renders as a black block in CEF). */
 #inv { position:fixed; inset:0; z-index:10; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; }
-.scrim { position:fixed; inset:0; z-index:0;
-    background:
-        radial-gradient(130% 100% at 50% 45%, rgba(0,0,0,.30) 0%, rgba(0,0,0,.62) 60%, rgba(0,0,0,.82) 100%);
+    align-items:center; justify-content:center;
+    background:radial-gradient(130% 110% at 50% 45%, rgba(0,0,0,.42) 0%, rgba(0,0,0,.66) 55%, rgba(0,0,0,.82) 100%);
     animation:fade .3s var(--ease); }
+.scrim { display:none; } /* deprecated: dim moved to #inv */
 @keyframes fade { from { opacity:0; } }
 
 .inv-wrap { position:relative; z-index:1; display:flex; gap:20px; align-items:stretch;
@@ -41,7 +41,7 @@ svg { stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; st
         0 26px 60px -26px rgba(0,0,0,.85),
         0 2px 0 rgba(0,0,0,.4),
         inset 0 1px 0 rgba(255,255,255,.08);
-    backdrop-filter:blur(18px); }
+ }
 .panel-head { display:flex; align-items:center; justify-content:space-between; gap:18px;
     padding:18px 20px; border-bottom:1px solid var(--hair); }
 .brand { display:flex; align-items:center; gap:12px; }
@@ -103,7 +103,7 @@ svg { stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; st
 /* Hint bar */
 .hint-bar { position:relative; z-index:1; margin-top:20px; display:flex; align-items:center; gap:14px;
     padding:12px 22px; border-radius:12px; background:var(--panel); border:1px solid var(--hair);
-    backdrop-filter:blur(12px); font-size:12px; color:var(--muted); }
+ font-size:12px; color:var(--muted); }
 .hint-bar b { color:#fff; font-weight:600; }
 .hint-bar i { width:1px; height:14px; background:var(--hair2); display:inline-block; }
 
@@ -119,7 +119,7 @@ svg { stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; st
 .ctx-sep { height:1px; background:var(--hair); margin:4px 6px; }
 
 /* Amount modal */
-.amount-scrim { position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.5); backdrop-filter:blur(3px); }
+.amount-scrim { position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.5); }
 .amount-modal { position:fixed; z-index:51; top:50%; left:50%; transform:translate(-50%,-50%);
     width:320px; background:linear-gradient(180deg,rgba(24,25,28,.98),rgba(16,17,20,.98));
     border:1px solid var(--hair2); border-radius:18px; padding:24px; box-shadow:0 40px 90px rgba(0,0,0,.6);
@@ -155,7 +155,7 @@ svg { stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; st
 .itembox-wrap { position:fixed; z-index:60; right:26px; bottom:26px; display:flex; flex-direction:column;
     gap:10px; align-items:flex-end; }
 .itembox { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:12px;
-    background:rgba(18,19,22,.96); border:1px solid var(--hair2); backdrop-filter:blur(12px);
+    background:rgba(18,19,22,.96); border:1px solid var(--hair2);
     box-shadow:0 16px 40px rgba(0,0,0,.5); animation:slideIn .4s var(--ease); }
 .itembox.out { animation:slideOut .4s var(--ease) forwards; }
 @keyframes slideIn { from { opacity:0; transform:translateX(40px); } }
@@ -177,7 +177,7 @@ svg { stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; st
 /* Hotbar peek (no focus) */
 .hotbar-peek { position:fixed; z-index:9; left:50%; bottom:26px; transform:translateX(-50%);
     display:flex; gap:10px; padding:10px; border-radius:14px; background:rgba(14,15,17,.7);
-    border:1px solid var(--hair); backdrop-filter:blur(10px); animation:slideUp .3s var(--ease); }
+    border:1px solid var(--hair); animation:slideUp .3s var(--ease); }
 .hotbar-peek.out { animation:fadeOut .4s var(--ease) forwards; }
 @keyframes slideUp { from { opacity:0; transform:translate(-50%,20px); } }
 @keyframes fadeOut { to { opacity:0; } }

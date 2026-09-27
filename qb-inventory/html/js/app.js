@@ -38,6 +38,23 @@
     }
 
     // ---- helpers ----
+    // Lua->JSON turns a contiguous slot table into a 0-indexed ARRAY and a
+    // sparse one into an OBJECT. Rebuild a reliable {slot: entry} map using
+    // each entry's own .slot so rendering is always correct.
+    function toBySlot(items) {
+        const map = {};
+        if (!items) return map;
+        const vals = Array.isArray(items) ? items : Object.values(items);
+        for (const it of vals) {
+            if (it && it.name) map[it.slot || (vals.indexOf(it) + 1)] = it;
+        }
+        return map;
+    }
+    function normalize(container) {
+        if (container) container.items = toBySlot(container.items);
+        return container;
+    }
+
     const kg = g => ((g || 0) / 1000).toFixed(1);
     function imgPath(file) { return (S.boot.imagePath || 'images/%s').replace('%s', file); }
     function imageUrl(item) { return imgPath(item.image || (item.name + '.png')); }
@@ -306,8 +323,8 @@
 
     // ---- open / close ----
     function openUI(data) {
-        S.player = data.player;
-        S.secondary = data.secondary || null;
+        S.player = normalize(data.player);
+        S.secondary = data.secondary ? normalize(data.secondary) : null;
         if (data.boot) S.boot = Object.assign(S.boot, data.boot);
         S.open = true;
         $('#inv').classList.remove('hidden');
@@ -327,11 +344,11 @@
             case 'boot': S.boot = Object.assign(S.boot, d.data || {}); if (d.data && d.data.brand && d.data.brand.name) $$('[data-brand-name]').forEach(e => e.textContent = d.data.brand.name); break;
             case 'open': openUI(d.data); break;
             case 'close': closeUI(); break;
-            case 'updatePlayer': S.player = d.data; if (S.open) render(); break;
-            case 'updateSecondary': S.secondary = d.data; if (S.open) render(); break;
+            case 'updatePlayer': S.player = normalize(d.data); if (S.open) render(); break;
+            case 'updateSecondary': S.secondary = normalize(d.data); if (S.open) render(); break;
             case 'itemBox': itemBox(d.data); break;
             case 'toast': toast(d.data.message); break;
-            case 'peekHotbar': peekHotbar(d.data.player); break;
+            case 'peekHotbar': peekHotbar(normalize(d.data.player)); break;
         }
     });
 

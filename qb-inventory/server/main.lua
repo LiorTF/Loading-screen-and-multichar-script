@@ -266,15 +266,70 @@ function LT.SetInventory(src, items)
     P.Functions.Save(); LT.pushInventory(src)
 end
 
--- Register the exports.
+function LT.GetItemsByName(src, name)
+    local P = QBCore.Functions.GetPlayer(src); if not P then return {} end
+    local out = {}
+    for i = 1, Config.MaxSlots do if P.PlayerData.items[i] and P.PlayerData.items[i].name == name then out[#out + 1] = P.PlayerData.items[i] end end
+    return out
+end
+
+function LT.GetSlotsByItem(src, name)
+    local P = QBCore.Functions.GetPlayer(src); if not P then return {} end
+    local out = {}
+    for i = 1, Config.MaxSlots do if P.PlayerData.items[i] and P.PlayerData.items[i].name == name then out[#out + 1] = i end end
+    return out
+end
+
+function LT.GetFreeSlot(src)
+    local P = QBCore.Functions.GetPlayer(src); if not P then return nil end
+    return firstEmptySlot(P.PlayerData.items, Config.MaxSlots)
+end
+
+function LT.CanAddItem(src, name, amount)
+    local P = QBCore.Functions.GetPlayer(src); if not P then return false end
+    if not LT.canCarry(P.PlayerData.items, Config.MaxWeight, name, amount or 1) then return false end
+    local d = LT.ItemData(name); if not d then return false end
+    if (d.unique or false) and countFree(P.PlayerData.items, Config.MaxSlots) < (amount or 1) then return false end
+    return true
+end
+
+function LT.GetInventory(src)
+    local P = QBCore.Functions.GetPlayer(src); if not P then return {} end
+    return P.PlayerData.items
+end
+
+function LT.CloseInventory(src)
+    TriggerClientEvent('lt-inventory:client:forceClose', src)
+    local pc = LT.getContainer(src, 'player'); if pc then LT.saveContainer(pc) end
+    LT.Open[src] = nil
+end
+
+function LT.UseItem(src, item)
+    if not item then return end
+    if QBCore.Functions.UseItem then QBCore.Functions.UseItem(src, item)
+    else
+        local cb = QBCore.Functions.CanUseItem and QBCore.Functions.CanUseItem(item.name)
+        if type(cb) == 'table' and cb.func then cb.func(src, item)
+        elseif type(cb) == 'function' then cb(src, item) end
+    end
+end
+
+-- Register the exports (qb-inventory-compatible surface).
 exports('AddItem',        function(src, ...) return LT.AddItem(src, ...) end)
 exports('RemoveItem',     function(src, ...) return LT.RemoveItem(src, ...) end)
 exports('GetItemByName',  function(src, ...) return LT.GetItemByName(src, ...) end)
+exports('GetItemsByName', function(src, ...) return LT.GetItemsByName(src, ...) end)
 exports('GetItemBySlot',  function(src, ...) return LT.GetItemBySlot(src, ...) end)
 exports('GetItemCount',   function(src, ...) return LT.GetItemCount(src, ...) end)
+exports('GetSlotsByItem', function(src, ...) return LT.GetSlotsByItem(src, ...) end)
+exports('GetFreeSlot',    function(src) return LT.GetFreeSlot(src) end)
+exports('CanAddItem',     function(src, name, amount) return LT.CanAddItem(src, name, amount) end)
+exports('GetInventory',   function(src) return LT.GetInventory(src) end)
 exports('HasItem',        function(src, ...) return LT.HasItem(src, ...) end)
 exports('ClearInventory', function(src) return LT.ClearInventory(src) end)
 exports('SetInventory',   function(src, items) return LT.SetInventory(src, items) end)
+exports('CloseInventory', function(src) return LT.CloseInventory(src) end)
+exports('UseItem',        function(src, item) return LT.UseItem(src, item) end)
 exports('CreateUsableItem', function(name, cb) QBCore.Functions.CreateUseableItem(name, cb) end)
 
 -- ─────────────────────────────────────────────────────────────────

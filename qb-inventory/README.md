@@ -34,17 +34,20 @@ trunk/glovebox, shops and ground drops.
 ```cfg
 ensure oxmysql
 ensure qb-core
-ensure lt-inventory
+ensure qb-inventory
 ```
 
 - Tables `lt_inventory_stashes` and `lt_inventory_vehicles` are created on start.
-- **Replaces `qb-inventory`.** Stop the old one:
-  ```cfg
-  # ensure qb-inventory
-  ```
-  If a third-party script calls `exports['qb-inventory']:...` directly, either
-  update it to `exports['lt-inventory']:...` (same function names) **or** rename
-  this resource's folder to `qb-inventory` to act as a full drop-in.
+- **This IS your `qb-inventory`.** The folder must be named `qb-inventory`
+  because qb-core and scripts like qb-radio call `exports['qb-inventory']` by
+  that exact name. **Delete/replace your stock `qb-inventory`** with this folder
+  and keep a single `ensure qb-inventory` line. The UI stays Lior Tools branded.
+- It exposes the standard qb-inventory export surface (client **and** server:
+  `HasItem`, `AddItem`, `RemoveItem`, `GetItemByName`, `GetItemsByName`,
+  `GetItemBySlot`, `GetItemCount`, `GetSlotsByItem`, `GetFreeSlot`, `CanAddItem`,
+  `GetInventory`, `SetInventory`, `ClearInventory`, `CreateUsableItem`,
+  `CloseInventory`, `UseItem`, `OpenShop`, `OpenStash`, `OpenInventory`), so
+  qb-core, qb-radio and other scripts keep working unchanged.
 
 ### Item images
 Drop your PNGs into `lt-inventory/html/images/` named to match each item's
@@ -70,7 +73,7 @@ All rebindable in FiveM's keybind settings or via `config.lua`.
 ## 🔌 Exports (server)
 
 ```lua
-local inv = exports['lt-inventory']
+local inv = exports['qb-inventory']
 
 inv:AddItem(src, name, amount, slot, info)   -- returns bool
 inv:RemoveItem(src, name, amount, slot)      -- returns bool
@@ -92,16 +95,16 @@ inv:OpenInventory(src, 'stash'|'trunk'|'glovebox', id, 'Label')
 ## 🔌 Exports (client)
 
 ```lua
-exports['lt-inventory']:OpenStash('personal_'..citizenid, 50, 100000, 'Personal Stash')
-exports['lt-inventory']:OpenShop('ammunation')
-exports['lt-inventory']:IsOpen()   -- bool
+exports['qb-inventory']:OpenStash('personal_'..citizenid, 50, 100000, 'Personal Stash')
+exports['qb-inventory']:OpenShop('ammunation')
+exports['qb-inventory']:IsOpen()   -- bool
 ```
 
 Register a usable item exactly like qb:
 ```lua
-exports['lt-inventory']:CreateUsableItem('bandage', function(source, item)
+exports['qb-inventory']:CreateUsableItem('bandage', function(source, item)
     -- heal logic…
-    exports['lt-inventory']:RemoveItem(source, 'bandage', 1, item.slot)
+    exports['qb-inventory']:RemoveItem(source, 'bandage', 1, item.slot)
 end)
 ```
 
@@ -111,7 +114,7 @@ end)
 
 Defined in `config.lua` → `Config.Shops`. Open one from anywhere:
 ```lua
-exports['lt-inventory']:OpenShop('convenience')  -- client
+exports['qb-inventory']:OpenShop('convenience')  -- client
 ```
 
 ## 🗄️ Database

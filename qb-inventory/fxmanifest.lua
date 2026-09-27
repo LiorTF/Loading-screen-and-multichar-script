@@ -2,10 +2,14 @@ fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
 
-name 'lt-inventory'
+-- NOTE: the FOLDER/resource name MUST be `qb-inventory` because qb-core and
+-- many scripts (qb-radio, etc.) call exports['qb-inventory'] by that exact
+-- name. This is the Lior Tools inventory acting as a full drop-in replacement.
+name 'qb-inventory'
 author 'Lior Tools'
-description 'Lior Tools — Inventory (QBCore). Cinematic monochrome UI, server-authoritative.'
+description 'Lior Tools — Inventory (QBCore drop-in). Cinematic monochrome UI, server-authoritative.'
 version '1.0.0'
+provide 'qb-inventory'
 
 ui_page 'html/index.html'
 
@@ -31,9 +35,7 @@ files {
     'html/fonts/*.woff2',
     'html/assets/*.png',
     'html/assets/*.jpg',
-    'html/images/*.png',
-    'html/images/*.jpg',
-    'html/images/*.webp'
+    'html/images/*.png'
 }
 
 dependencies {

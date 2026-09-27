@@ -13,10 +13,14 @@ Built for **QBCore**. One cohesive look, zero external dependencies at runtime.
 > | Resource | What it does | Docs |
 > |----------|--------------|------|
 > | **`lt-startscreen`** | Loading screen + Multicharacter + Spawn selector | *(below)* |
-> | **`lt-inventory`** | Full cinematic inventory (grid, hotbar, stash, trunk, shops, drops) | [`lt-inventory/README.md`](lt-inventory/README.md) |
+> | **`qb-inventory`** (Lior Tools) | Full cinematic inventory (grid, hotbar, stash, trunk, shops, drops) | [`qb-inventory/README.md`](qb-inventory/README.md) |
 >
 > They work independently — run one or both. Ensure order:
-> `oxmysql` → `qb-core` → `lt-startscreen` → `lt-inventory`.
+> `oxmysql` → `qb-core` → `lt-startscreen` → `qb-inventory`.
+>
+> The inventory folder is named **`qb-inventory`** on purpose — qb-core and
+> scripts like qb-radio call `exports['qb-inventory']` by that exact name, so
+> it must replace the stock `qb-inventory` to work. The UI is still Lior Tools.
 
 ---
 

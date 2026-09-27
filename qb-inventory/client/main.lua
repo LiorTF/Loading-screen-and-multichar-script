@@ -56,6 +56,8 @@ RegisterNetEvent('lt-inventory:client:openUI', function(payload)
     SendNUIMessage({ action = 'open', data = { player = payload.player, secondary = payload.secondary, boot = BOOT } })
 end)
 
+RegisterNetEvent('lt-inventory:client:forceClose', function() closeUI() end)
+
 RegisterNetEvent('lt-inventory:client:setPlayer', function(data)
     SendNUIMessage({ action = 'updatePlayer', data = data })
 end)
@@ -178,6 +180,57 @@ end, false)
 exports('OpenStash', function(id, slots, maxWeight, label) TriggerServerEvent('lt-inventory:server:openStash', id, slots, maxWeight, label) end)
 exports('OpenShop',  function(shop) TriggerServerEvent('lt-inventory:server:openShop', shop) end)
 exports('IsOpen',    function() return uiOpen end)
+exports('CloseInventory', function() closeUI() end)
+
+-- Generic open used by some scripts: OpenInventory('stash'|'trunk'|'glovebox'|'shop', id, data)
+exports('OpenInventory', function(kind, id, data)
+    data = data or {}
+    if kind == 'stash' then TriggerServerEvent('lt-inventory:server:openStash', id, data.slots, data.maxweight or data.maxWeight, data.label)
+    elseif kind == 'shop' then TriggerServerEvent('lt-inventory:server:openShop', id)
+    elseif kind == 'trunk' then TriggerServerEvent('lt-inventory:server:openTrunk', id)
+    elseif kind == 'glovebox' then TriggerServerEvent('lt-inventory:server:openGlovebox', id) end
+end)
+
+-- ─────────────────────────────────────────────────────────────────
+-- CLIENT item queries  (qb-core & many scripts call these by name).
+-- Reads the local, qb-core-maintained PlayerData.items.
+-- ─────────────────────────────────────────────────────────────────
+local function localItems()
+    local pd = QBCore.Functions.GetPlayerData()
+    return (pd and pd.items) or {}
+end
+
+local function localCount(name)
+    local n = 0
+    for _, it in pairs(localItems()) do
+        if it and it.name == name then n = n + (it.amount or 0) end
+    end
+    return n
+end
+
+local function clientHasItem(items, amount)
+    amount = amount or 1
+    local need = {}
+    if type(items) == 'table' then
+        if items[1] then for _, n in ipairs(items) do need[n] = amount end
+        else for n, a in pairs(items) do need[n] = a end end
+    else need[items] = amount end
+    for n, a in pairs(need) do if localCount(n) < a then return false end end
+    return true
+end
+
+exports('HasItem', clientHasItem)
+exports('GetItemCount', function(name) return localCount(name) end)
+exports('GetPlayerItems', function() return localItems() end)
+exports('GetItemByName', function(name)
+    for _, it in pairs(localItems()) do if it and it.name == name then return it end end
+    return nil
+end)
+exports('GetItemsByName', function(name)
+    local out = {}
+    for _, it in pairs(localItems()) do if it and it.name == name then out[#out + 1] = it end end
+    return out
+end)
 
 -- ─────────────────────────────────────────────────────────────────
 -- Ground drops (marker + [E] pickup, optional visible prop)

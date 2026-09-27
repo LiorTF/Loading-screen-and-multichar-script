@@ -66,6 +66,19 @@ keep images in another resource.
 | `Z` | Peek hotbar |
 | `/trunk`, `/glovebox` | Open nearest vehicle storage |
 
+### Admin / test commands (permission `admin`)
+
+| Command | Action |
+|---------|--------|
+| `/giveitem [id] [item] [amount]` | Give an item to a player |
+| `/additem [item] [amount]` | Give yourself an item (quick test) |
+| `/clearinv [id]` | Wipe a player's inventory |
+| `/givestarter [id]` | Re-grant the starter kit |
+
+The **starter kit** (`Config.StartingItems`) is granted **once per character**,
+including existing characters — they receive it the next time they log in
+(a metadata flag prevents re-granting). Use `/givestarter` to force it.
+
 All rebindable in FiveM's keybind settings or via `config.lua`.
 
 ---

@@ -630,18 +630,26 @@ end)
 
 AddEventHandler('playerDropped', function() LT.Open[source] = nil end)
 
--- Grant starting items once per character.
-AddEventHandler('QBCore:Server:OnPlayerLoaded', function(Player)
+-- Grant the starter kit ONCE per character — applies to existing characters
+-- too (they just need to relog once; the metadata flag prevents re-granting).
+local function grantStarterKit(src)
     if not Config.StartingItems or #Config.StartingItems == 0 then return end
-    if not Player or not Player.PlayerData then return end
-    local md = Player.PlayerData.metadata or {}
+    local P = QBCore.Functions.GetPlayer(src); if not P then return end
+    local md = P.PlayerData.metadata or {}
     if md.lt_inv_init then return end
-    local src = Player.PlayerData.source
     for _, it in ipairs(Config.StartingItems) do
         LT.AddItem(src, it.name, it.amount)
     end
-    Player.Functions.SetMetaData('lt_inv_init', true)
-    Player.Functions.Save()
+    P.Functions.SetMetaData('lt_inv_init', true)
+    P.Functions.Save()
+    dbg('granted starter kit to ' .. (GetPlayerName(src) or src))
+end
+
+AddEventHandler('QBCore:Server:OnPlayerLoaded', function(arg)
+    local src
+    if type(arg) == 'table' and arg.PlayerData then src = arg.PlayerData.source
+    elseif type(arg) == 'number' then src = arg end
+    if src then SetTimeout(500, function() grantStarterKit(src) end) end
 end)
 
 -- Send item/rarity metadata to a joining client so the UI can render labels
@@ -653,6 +661,67 @@ QBCore.Functions.CreateCallback('lt-inventory:server:getState', function(src, cb
     if not c then return cb(false) end
     cb({ player = { items = c.items, maxWeight = c.maxWeight, slots = c.slots, weight = LT.weight(c.items) } })
 end)
+
+-- ─────────────────────────────────────────────────────────────────
+-- ADMIN / TEST COMMANDS
+-- ─────────────────────────────────────────────────────────────────
+local function notify(src, msg, kind)
+    TriggerClientEvent('QBCore:Notify', src, msg, kind or 'primary')
+end
+
+-- /giveitem [id] [item] [amount]  — give an item to a player
+QBCore.Commands.Add('giveitem', 'Give an item to a player (Admin)', {
+    { name = 'id', help = 'Player server ID' },
+    { name = 'item', help = 'Item name (e.g. water_bottle)' },
+    { name = 'amount', help = 'Amount (default 1)' }
+}, false, function(source, args)
+    local target = tonumber(args[1])
+    local item = args[2]
+    local amount = tonumber(args[3]) or 1
+    if not target or not item then return notify(source, 'Usage: /giveitem [id] [item] [amount]', 'error') end
+    if not QBCore.Functions.GetPlayer(target) then return notify(source, 'Player ' .. target .. ' is not online.', 'error') end
+    if not LT.ItemData(item) then return notify(source, 'Unknown item: ' .. item, 'error') end
+    if LT.AddItem(target, item, amount) then
+        notify(source, ('Gave %dx %s to #%d'):format(amount, item, target), 'success')
+        if target ~= source then notify(target, ('You received %dx %s'):format(amount, LT.ItemData(item).label), 'success') end
+    else
+        notify(source, 'Could not add item (inventory full / too heavy).', 'error')
+    end
+end, 'admin')
+
+-- /additem [item] [amount]  — quick self-give for testing
+QBCore.Commands.Add('additem', 'Give yourself an item (Admin)', {
+    { name = 'item', help = 'Item name (e.g. phone)' },
+    { name = 'amount', help = 'Amount (default 1)' }
+}, false, function(source, args)
+    local item = args[1]
+    local amount = tonumber(args[2]) or 1
+    if not item then return notify(source, 'Usage: /additem [item] [amount]', 'error') end
+    if not LT.ItemData(item) then return notify(source, 'Unknown item: ' .. item, 'error') end
+    if LT.AddItem(source, item, amount) then notify(source, ('Added %dx %s'):format(amount, item), 'success')
+    else notify(source, 'Could not add item.', 'error') end
+end, 'admin')
+
+-- /clearinv [id]  — wipe a player's inventory (Admin)
+QBCore.Commands.Add('clearinv', 'Clear a player inventory (Admin)', {
+    { name = 'id', help = 'Player server ID (blank = self)' }
+}, false, function(source, args)
+    local target = tonumber(args[1]) or source
+    if not QBCore.Functions.GetPlayer(target) then return notify(source, 'Player not online.', 'error') end
+    LT.ClearInventory(target)
+    notify(source, 'Cleared inventory of #' .. target, 'success')
+end, 'admin')
+
+-- /givestarter [id]  — force-grant the starter kit again (Admin)
+QBCore.Commands.Add('givestarter', 'Force-grant the starter kit (Admin)', {
+    { name = 'id', help = 'Player server ID (blank = self)' }
+}, false, function(source, args)
+    local target = tonumber(args[1]) or source
+    local P = QBCore.Functions.GetPlayer(target); if not P then return notify(source, 'Player not online.', 'error') end
+    for _, it in ipairs(Config.StartingItems or {}) do LT.AddItem(target, it.name, it.amount) end
+    P.Functions.SetMetaData('lt_inv_init', true); P.Functions.Save()
+    notify(source, 'Granted starter kit to #' .. target, 'success')
+end, 'admin')
 
 QBCore.Functions.CreateCallback('lt-inventory:server:bootData', function(src, cb)
     cb({

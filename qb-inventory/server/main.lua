@@ -90,6 +90,7 @@ function LT.saveContainer(c)
     if c.kind == 'player' or c.kind == 'otherplayer' then
         if c.player then
             c.player.Functions.SetPlayerData('items', c.items)
+            if LT.persistPlayer then LT.persistPlayer(c.player) end
         end
     elseif c.kind == 'ground' then
         -- kept in memory; nothing to persist
@@ -314,7 +315,105 @@ function LT.UseItem(src, item)
     end
 end
 
+-- ─────────────────────────────────────────────────────────────────
+-- MODERN qb-core lifecycle: qb-core calls these on the inventory resource
+-- during player login / save / logout. Without them, logins crash.
+-- ─────────────────────────────────────────────────────────────────
+
+-- Write a player's items straight to the players.inventory column (light).
+function LT.persistPlayer(P)
+    if not P or not P.PlayerData or not P.PlayerData.citizenid then return end
+    MySQL.update('UPDATE players SET inventory = ? WHERE citizenid = ?',
+        { json.encode(P.PlayerData.items or {}), P.PlayerData.citizenid })
+end
+
+-- Read + normalize a character's inventory from the DB. qb-core assigns the
+-- returned table to PlayerData.items on login.
+function LT.LoadInventory(source, citizenid)
+    local raw = MySQL.scalar.await('SELECT inventory FROM players WHERE citizenid = ?', { citizenid })
+    local items = {}
+    if raw and raw ~= '' then
+        local ok, decoded = pcall(json.decode, raw)
+        if ok and type(decoded) == 'table' then
+            for k, v in pairs(decoded) do
+                if v and v.name then
+                    local slot = tonumber(v.slot) or tonumber(k)
+                    local d = LT.ItemData(v.name)
+                    if d and slot then
+                        items[slot] = {
+                            name = v.name, amount = v.amount or 1, slot = slot, info = v.info or {},
+                            label = d.label, description = d.description or '', weight = d.weight or 0,
+                            type = d.type or 'item', unique = d.unique or false,
+                            useable = d.useable or false, image = d.image or (v.name .. '.png'),
+                            ammotype = d.ammotype, created = v.created
+                        }
+                    end
+                end
+            end
+        end
+    end
+    return items
+end
+
+-- Persist a player's inventory. Online: (source, false). Offline: (PlayerData, true).
+function LT.SaveInventory(arg, offline)
+    local items, citizenid
+    if offline then
+        local pd = arg
+        if type(pd) ~= 'table' then return end
+        pd = pd.PlayerData or pd
+        items = pd.items or {}
+        citizenid = pd.citizenid
+    else
+        local P = QBCore.Functions.GetPlayer(arg)
+        if not P then return end
+        items = P.PlayerData.items or {}
+        citizenid = P.PlayerData.citizenid
+    end
+    if not citizenid then return end
+    MySQL.update('UPDATE players SET inventory = ? WHERE citizenid = ?', { json.encode(items), citizenid })
+end
+
+-- Usable items (kept locally so we work whether or not qb-core stores them).
+LT.Usables = LT.Usables or {}
+function LT.CreateUsableItem(name, data)
+    LT.Usables[name] = data
+    if QBCore.Functions.CreateUseableItem then QBCore.Functions.CreateUseableItem(name, data) end
+end
+function LT.GetUsableItem(name)
+    if LT.Usables[name] ~= nil then return LT.Usables[name] end
+    if QBCore.Functions.CanUseItem then return QBCore.Functions.CanUseItem(name) end
+    return nil
+end
+function LT.UseItem(source, item)
+    if not item then return end
+    local data = LT.GetUsableItem(item.name)
+    if type(data) == 'table' and data.func then data.func(source, item)
+    elseif type(data) == 'function' then data(source, item)
+    elseif QBCore.Functions.UseItem then QBCore.Functions.UseItem(source, item) end
+end
+
+-- Set arbitrary metadata on an item (some scripts rely on this).
+function LT.SetItemData(source, itemName, key, val)
+    local P = QBCore.Functions.GetPlayer(source); if not P then return false end
+    for i = 1, Config.MaxSlots do
+        local it = P.PlayerData.items[i]
+        if it and it.name == itemName then
+            it[key] = val
+            P.Functions.SetPlayerData('items', P.PlayerData.items)
+            LT.persistPlayer(P); LT.pushInventory(source)
+            return true
+        end
+    end
+    return false
+end
+
 -- Register the exports (qb-inventory-compatible surface).
+exports('LoadInventory',  function(source, citizenid) return LT.LoadInventory(source, citizenid) end)
+exports('SaveInventory',  function(arg, offline) return LT.SaveInventory(arg, offline) end)
+exports('GetUsableItem',  function(name) return LT.GetUsableItem(name) end)
+exports('UseItem',        function(source, item) return LT.UseItem(source, item) end)
+exports('SetItemData',    function(source, name, key, val) return LT.SetItemData(source, name, key, val) end)
 exports('AddItem',        function(src, ...) return LT.AddItem(src, ...) end)
 exports('RemoveItem',     function(src, ...) return LT.RemoveItem(src, ...) end)
 exports('GetItemByName',  function(src, ...) return LT.GetItemByName(src, ...) end)
@@ -329,8 +428,7 @@ exports('HasItem',        function(src, ...) return LT.HasItem(src, ...) end)
 exports('ClearInventory', function(src) return LT.ClearInventory(src) end)
 exports('SetInventory',   function(src, items) return LT.SetInventory(src, items) end)
 exports('CloseInventory', function(src) return LT.CloseInventory(src) end)
-exports('UseItem',        function(src, item) return LT.UseItem(src, item) end)
-exports('CreateUsableItem', function(name, cb) QBCore.Functions.CreateUseableItem(name, cb) end)
+exports('CreateUsableItem', function(name, cb) return LT.CreateUsableItem(name, cb) end)
 
 -- ─────────────────────────────────────────────────────────────────
 -- MOVE  (the heart of drag & drop, works across any two containers)
@@ -424,14 +522,7 @@ RegisterNetEvent('lt-inventory:server:use', function(slot)
     if not item then return end
     local d = LT.ItemData(item.name); if not d then return end
     if not d.useable then return end
-    -- Route through QBCore's useable-item system (version-safe).
-    if QBCore.Functions.UseItem then
-        QBCore.Functions.UseItem(src, item)
-    else
-        local cb = QBCore.Functions.CanUseItem and QBCore.Functions.CanUseItem(item.name)
-        if type(cb) == 'table' and cb.func then cb.func(src, item)
-        elseif type(cb) == 'function' then cb(src, item) end
-    end
+    LT.UseItem(src, item)
 end)
 
 -- ─────────────────────────────────────────────────────────────────

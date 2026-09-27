@@ -630,6 +630,20 @@ end)
 
 AddEventHandler('playerDropped', function() LT.Open[source] = nil end)
 
+-- Grant starting items once per character.
+AddEventHandler('QBCore:Server:OnPlayerLoaded', function(Player)
+    if not Config.StartingItems or #Config.StartingItems == 0 then return end
+    if not Player or not Player.PlayerData then return end
+    local md = Player.PlayerData.metadata or {}
+    if md.lt_inv_init then return end
+    local src = Player.PlayerData.source
+    for _, it in ipairs(Config.StartingItems) do
+        LT.AddItem(src, it.name, it.amount)
+    end
+    Player.Functions.SetMetaData('lt_inv_init', true)
+    Player.Functions.Save()
+end)
+
 -- Send item/rarity metadata to a joining client so the UI can render labels
 -- and rings without a round-trip per item.
 -- Current player inventory (for opening self / hotbar peek). Does not alter

@@ -36,9 +36,18 @@ Config.DropExpire  = 0         -- minutes before a ground drop despawns (0 = nev
 Config.DropObject  = 'prop_cs_heist_bag_01' -- prop spawned for visible drops (or false)
 
 -- Item image path (relative to html/). Drop your PNGs into html/images/.
--- If an image is missing, an elegant monogram tile is shown automatically,
--- so the UI never looks broken.
+-- If an image is missing, a generic default icon is shown, then a monogram
+-- tile — so the UI never looks broken.
 Config.ImagePath   = 'images/%s'
+
+-- Items granted ONCE to each newly created character (tracked via metadata,
+-- so dropping everything won't re-grant them). Set to {} to disable.
+Config.StartingItems = {
+    { name = 'phone',        amount = 1 },
+    { name = 'water_bottle', amount = 2 },
+    { name = 'sandwich',     amount = 1 },
+    { name = 'bandage',      amount = 2 }
+}
 
 -- Play a subtle click/hover sfx in the UI (bundled-free; uses tiny WebAudio beeps).
 Config.UiSounds    = true

@@ -39,7 +39,10 @@
 
     // ---- helpers ----
     const kg = g => ((g || 0) / 1000).toFixed(1);
-    function imageUrl(item) { return (S.boot.imagePath || 'images/%s').replace('%s', item.image || (item.name + '.png')); }
+    function imgPath(file) { return (S.boot.imagePath || 'images/%s').replace('%s', file); }
+    function imageUrl(item) { return imgPath(item.image || (item.name + '.png')); }
+    // item image -> generic default icon -> monogram
+    const imgFallback = `onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${imgPath('default.png')}'}else{this.remove()}"`;
     function rarityOf(item) {
         const R = S.boot.rarity || {};
         return R[item.name] || R[item.type] || 1;
@@ -67,7 +70,7 @@
             ${isHot ? `<span class="num">${index}</span>` : ''}
             <div class="item">
               <div class="mono">${monogram(item)}</div>
-              <img src="${imageUrl(item)}" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()" />
+              <img src="${imageUrl(item)}" onload="this.previousElementSibling.style.display='none'" ${imgFallback} />
               ${amt}
               <span class="lbl">${item.label || item.name}</span>
               ${price}
@@ -274,7 +277,7 @@
         el.className = 'itembox';
         el.innerHTML = `
           <div class="ib-img"><div class="mono">${monogram({ label: data.label })}</div>
-            <img src="${(S.boot.imagePath || 'images/%s').replace('%s', data.image)}" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()"/></div>
+            <img src="${imgPath(data.image)}" onload="this.previousElementSibling.style.display='none'" ${imgFallback}/></div>
           <div class="ib-text"><span class="ib-amt ${data.added ? 'add' : 'rem'}">${data.added ? '+' : '−'}${data.amount}</span>
             <span class="ib-label">${data.label}</span></div>`;
         wrap.appendChild(el);

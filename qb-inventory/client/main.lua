@@ -23,21 +23,32 @@ end)
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function() loggedIn = true end)
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function() loggedIn = false end)
 AddEventHandler('onResourceStart', function(res)
-    if res == GetCurrentResourceName() and LocalPlayer.state.isLoggedIn then loggedIn = true end
+    if res == GetCurrentResourceName() and LocalPlayer.state and LocalPlayer.state.isLoggedIn then loggedIn = true end
 end)
+
+-- Robust readiness: trust the login flag, the state bag, OR a valid PlayerData.
+-- (Covers the case where this resource missed the OnPlayerLoaded event.)
+local function isReady()
+    if loggedIn then return true end
+    if LocalPlayer.state and LocalPlayer.state.isLoggedIn then loggedIn = true; return true end
+    local pd = QBCore.Functions.GetPlayerData()
+    if pd and pd.citizenid then loggedIn = true; return true end
+    return false
+end
 
 -- ─────────────────────────────────────────────────────────────────
 -- Open / close
 -- ─────────────────────────────────────────────────────────────────
 local function openSelf()
     if uiOpen then return closeUI() end
-    if not loggedIn then return end
-    if IsPauseMenuActive() then return end
+    if IsPauseMenuActive() then dbg('open blocked: pause menu'); return end
+    if not isReady() then dbg('open blocked: player not loaded yet'); return end
     QBCore.Functions.TriggerCallback('lt-inventory:server:getState', function(state)
-        if not state then return end
+        if not state then dbg('open blocked: server returned no state'); return end
         uiOpen = true
         SetNuiFocus(true, true)
         SendNUIMessage({ action = 'open', data = { player = state.player, secondary = false, boot = BOOT } })
+        dbg('inventory opened')
     end)
 end
 

@@ -1,9 +1,30 @@
 <div align="center">
 
-# LIOR TOOLS — Start Screen Suite
+# LIOR TOOLS — Roleplay Suite
+
+**Loading Screen · Multicharacter · Spawn Selector · Inventory**
+Built for **QBCore**. One cohesive look, zero external dependencies at runtime.
+
+</div>
+
+> This package ships **two resources** that share the exact same Lior Tools
+> theme, fonts and conventions:
+>
+> | Resource | What it does | Docs |
+> |----------|--------------|------|
+> | **`lt-startscreen`** | Loading screen + Multicharacter + Spawn selector | *(below)* |
+> | **`lt-inventory`** | Full cinematic inventory (grid, hotbar, stash, trunk, shops, drops) | [`lt-inventory/README.md`](lt-inventory/README.md) |
+>
+> They work independently — run one or both. Ensure order:
+> `oxmysql` → `qb-core` → `lt-startscreen` → `lt-inventory`.
+
+---
+
+<div align="center">
+
+## lt-startscreen
 
 **Cinematic Loading Screen · Multicharacter · Spawn Selector**
-Built for **QBCore**. One resource. Zero external dependencies at runtime.
 
 </div>
 

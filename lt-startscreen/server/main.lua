@@ -147,7 +147,10 @@ RegisterNetEvent('lt-startscreen:server:selectCharacter', function(citizenid)
         return
     end
 
-    local Player = QBCore.Player.Login(src, citizenid)
+    -- QBCore.Player.Login returns a boolean; the Player object is fetched after.
+    local ok = QBCore.Player.Login(src, citizenid)
+    if not ok then return end
+    local Player = QBCore.Functions.GetPlayer(src)
     if not Player then return end
 
     touchMeta(citizenid, license, false)
@@ -201,7 +204,13 @@ RegisterNetEvent('lt-startscreen:server:createCharacter', function(data)
         }
     }
 
-    local Player = QBCore.Player.Login(src, false, newData)
+    -- QBCore.Player.Login returns a boolean; the Player object is fetched after.
+    local ok = QBCore.Player.Login(src, false, newData)
+    if not ok then
+        TriggerClientEvent('lt-startscreen:client:createFailed', src, 'Could not create character.')
+        return
+    end
+    local Player = QBCore.Functions.GetPlayer(src)
     if not Player then
         TriggerClientEvent('lt-startscreen:client:createFailed', src, 'Could not create character.')
         return
